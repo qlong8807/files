@@ -1,0 +1,22 @@
+本文Apache+Tomcat集群配置 基于最新的Apache和Tomcat，具体是2011年4月20日最新的Tomcat和Apache集群和负载均衡配置。
+
+Test文件夹为集群服务器下的项目，直接拷贝到webapp下。
+conf为Apache安装目录下的修改过的配置，我的配置基于Apache2.2.17
+mod_jk-1.2.31-httpd-2.2.3.so为JK插件，放到Apache安装目录下的modules下
+server.xml为文档中Tomcat1的配置文件，其他tomcat只需要改端口和jvmRoute即可。
+
+如果您看过网上其他Apache+Tomcat的集群配置，您可能有的疑问？
+
+1.网上大部分的文章配置2个tocmat的集群，有的将workers.properties下的worker.controller.sticky_session=1，
+然后tomcat1中的server.xml中的jvmRoute设置为tomcat2，将tomcat2中的jvmRoute设置为tocmat1，当然我这样设置
+也成功了，但是如果3个或者更多tocmat呢,怎么设置每个tomcat的jvmRoute,我不会所以才考虑现在的配置
+
+2.server.xml中的Cluster配置问题，网上大部分都是使用BackupManager方式，即Cluster下又粘贴了一堆配置。其实
+只要将其中注释掉的<Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>去掉注释就完成session的集群
+复制了。只是这俩种复制采用的方式不同而已。http://tomcat.apache.org/tomcat-6.0-doc/cluster-howto.html，
+这页面已经说的挺清楚了，集群的session复制默认是DeltaManager，是all to all的复制，意思是将集群下1个tomcat应用下的session
+对所有的集群中的节点进行复制，即使那个节点没有发布应用。显然是不好的方式，但这在小规模的集群下并没神马问题。
+而采用BackupManager，就是众多网上配置那样，对于需要复制的节点设置BackupManager自然也没问题，
+但是它的性能并没有DeltaManager 好使“ Downside of the BackupManager: not quite as battle tested as the delta manager”。
+因此，具体怎么设置就看大家了，通常说如果不是大规模集群，就默认就好了。反正我自己翻译的就是这个意思了，希望没有误导大家。
+   
